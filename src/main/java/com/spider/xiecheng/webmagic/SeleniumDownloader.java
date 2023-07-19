@@ -168,10 +168,18 @@ public class SeleniumDownloader implements Downloader, Constants {
                 }
                 By parentElementLocator = By.xpath("//div[@class='m-review-tag']//div[@class='m-fastfilter']"); // 指定父元素的XPath表达式
                 By childElementLocator = By.xpath(".//button"); // 指定子元素的XPath表达式
-                while (true) {
+                By loadingElementLocator = By.xpath("//div[@class='m-reviewLoading']"); // 指定加载动画的XPath表达式
+                int count = 0;
+                while (++count <= MAX_REVIEW_PAGE_COUNT) {
+                    driverWait.until(ExpectedConditions.invisibilityOfElementLocated(loadingElementLocator));
                     // 携程酒店详情页面首次加载仅有2条评论，此处确保详情页加载完全
                     driverWait.until(ExpectedConditions.visibilityOfNestedElementsLocatedBy(parentElementLocator, childElementLocator));
                     reviewHtmls.add(driver.getPageSource());
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                     try {
                         //  跳转下页
                         driverWait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@class='forward active']"))).click();
